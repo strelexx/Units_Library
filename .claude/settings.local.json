@@ -14,7 +14,17 @@
       "Bash(gh repo:*)",
       "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm)",
       "Bash(npm install:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(docker info:*)",
+      "Bash(supabase init:*)",
+      "Bash(supabase start:*)",
+      "Bash(supabase status:*)",
+      "Bash(supabase migration:*)",
+      "Bash(supabase db:*)",
+      "Bash(npx supabase:*)",
+      "Bash(npm run:*)"
     ]
   }
 }
