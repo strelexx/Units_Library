@@ -68,7 +68,7 @@ export function DevelopersTable({
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm text-gray-900">
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
