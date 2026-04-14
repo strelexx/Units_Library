@@ -51,7 +51,15 @@ export default async function UsersPage() {
             {users && users.length > 0 ? (
               users.map((u) => (
                 <tr key={u.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">{u.name}</td>
+                  <td className="px-4 py-3">
+                    {isAdmin ? (
+                      <Link href={`/dashboard/users/${u.id}`} className="text-blue-600 hover:underline">
+                        {u.name}
+                      </Link>
+                    ) : (
+                      u.name
+                    )}
+                  </td>
                   <td className="px-4 py-3">{u.email}</td>
                   <td className="px-4 py-3 capitalize">{u.role}</td>
                   <td className="px-4 py-3">{u.team ?? "-"}</td>

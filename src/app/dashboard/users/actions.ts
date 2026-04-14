@@ -134,3 +134,85 @@ export async function createUser(data: {
   revalidatePath("/dashboard/users");
   return { success: true };
 }
+
+export async function updateUser(
+  userId: string,
+  data: {
+    firstName: string;
+    lastName: string;
+    team: string;
+    role: "admin" | "advisor";
+    isActive: boolean;
+    locations: LocationAssignment[];
+  }
+) {
+  // Verify caller is admin
+  const supabase = await createClient();
+  const { data: { user: caller } } = await supabase.auth.getUser();
+  if (!caller) return { error: "Not authenticated" };
+
+  const { data: callerProfile } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", caller.id)
+    .single();
+
+  if (callerProfile?.role !== "admin") {
+    return { error: "Only admins can edit users" };
+  }
+
+  if (!data.firstName?.trim() || !data.lastName?.trim()) {
+    return { error: "First name and last name are required" };
+  }
+
+  const fullName = `${data.firstName.trim()} ${data.lastName.trim()}`;
+  const adminClient = createAdminClient();
+
+  // Update profile
+  const { error: updateError } = await adminClient
+    .from("users")
+    .update({
+      name: fullName,
+      role: data.role,
+      team: data.team?.trim() || null,
+      is_active: data.isActive,
+    })
+    .eq("id", userId);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  // Replace location assignments: delete all then insert new
+  const { error: delError } = await adminClient
+    .from("user_locations")
+    .delete()
+    .eq("user_id", userId);
+
+  if (delError) {
+    return { error: "Failed to clear existing locations: " + delError.message };
+  }
+
+  if (data.locations.length > 0) {
+    const locationRows = data.locations.map((loc) => ({
+      user_id: userId,
+      city_id: loc.level === "city" ? loc.cityId! : null,
+      community_id: loc.level === "community" ? loc.communityId! : null,
+      sub_community_id:
+        loc.level === "sub_community" ? loc.subCommunityId! : null,
+      building_id: loc.level === "building" ? loc.buildingId! : null,
+    }));
+
+    const { error: locError } = await adminClient
+      .from("user_locations")
+      .insert(locationRows);
+
+    if (locError) {
+      return { error: "Failed to assign locations: " + locError.message };
+    }
+  }
+
+  revalidatePath("/dashboard/users");
+  revalidatePath(`/dashboard/users/${userId}`);
+  return { success: true };
+}
